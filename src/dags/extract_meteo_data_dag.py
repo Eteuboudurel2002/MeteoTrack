@@ -3,6 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 import requests
 from airflow.models import Variable
+#from airflow.providers.postgres.operators.postgres import PostgresOperator
 import psycopg2
 
 default_args = {
@@ -20,21 +21,29 @@ class Destination:
 
 def get_destination():
 
-    HOST = Variable.get("HOST")
-    PORT = Variable.get("PORT")  
-    DATABASE = Variable.get("DATABASE")
-    USER = Variable.get("USER")
-    PASSWORD = Variable.get("PASSWORD")
+    # HOST = Variable.get("HOST")
+    # PORT = Variable.get("PORT")  
+    # DATABASE = Variable.get("DATABASE")
+    # USER = Variable.get("USER")
+    # PASSWORD = Variable.get("PASSWORD")
 
     destinations = []
     
     try:
+        # connection = psycopg2.connect(
+        #     host=HOST,
+        #     port=PORT,
+        #     database=DATABASE,
+        #     user=USER,
+        #     password=PASSWORD
+        # )
+
         connection = psycopg2.connect(
-            host=HOST,
-            port=PORT,
-            database=DATABASE,
-            user=USER,
-            password=PASSWORD
+            host="localhost",
+            port=5433,
+            database="meteotrack",
+            user="airflow",
+            password="airflow"
         )
 
         cursor = connection.cursor()
@@ -51,24 +60,26 @@ def get_destination():
             dest = Destination(row[0], row[1], row[2])
             destinations.append(dest)
 
+        print(destinations)
+
         return destinations    
 
     except Exception as error:
         print(f"Error: {error}")
 
-    finally:
-        # Close the cursor and connection to free up resources
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
+    # finally:
+    #     # Close the cursor and connection to free up resources
+    #     if cursor:
+    #         cursor.close()
+    #     if connection:
+    #         connection.close()
 
 
 def request_api():
 
     destinations = get_destination()
 
-    api_key =  Variable.get("API_KEY")
+    api_key =  "0d24be46f76909016932d8dc50bb44de" #Variable.get("API_KEY")
 
     dest_weather_data =[]
 
@@ -107,12 +118,25 @@ def request_api():
         
 #request_api()
 
+#get_destination()
+
 with DAG('meteotrack',
          default_args=default_args,
          schedule_interval='@daily',
          catchup=False) as dag:
+    
+    # create_pet_table = PostgresOperator(
+    #     task_id="get Destination",
+    #     postgres_conn_id="postgres_default",
+    #     sql="SELECT * FROM Destination;",
+    # )
+
+    # print(create_pet_table)
 
     streaming_task = PythonOperator(
         task_id='request_api',
         python_callable=request_api
     )
+
+    #create_pet_table >> 
+    streaming_task

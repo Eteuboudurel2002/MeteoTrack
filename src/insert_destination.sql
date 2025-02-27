@@ -1,6 +1,8 @@
-INSERT INTO Destination (name, lat, lon) VALUES
-('Arc de Triomphe', 48.87824713555056, 2.2951888736057775),
-('Musée du Louvre', 48.86077341478219, 2.337665454169912),
-('Tour Eiffel', 48.86347670566574, 2.293823683598443),
-('Musée d''Orsay', 48.86412701671058, 2.3266197710219703),
-('Château de Versailles', 48.80514752183467, 2.1203607609124577);
+INSERT INTO Destination (name, lon, lat) VALUES
+('Paris', 2.3488, 48.8534),
+('Tokyo', 139.6917, 35.6895),
+('Moscou', 37.6156, 55.7522),
+('Caire', 7.0641, 44.9522),
+('Kribi', 9.9167, 2.95),
+('Rio de Janeiro', -43.2075, -22.9028),
+('New York', -74.006, 40.7143);
