@@ -44,6 +44,7 @@ def get_destination():
 
         # Fetch all rows from the executed query
         rows = cursor.fetchall()
+        print(rows)
 
         # Display the fetched data
         for row in rows:
@@ -66,11 +67,6 @@ def get_destination():
 def request_api():
 
     destinations = get_destination()
-
-    destinations = [
-        Destination("Arc de Triomphe", 48.87824713555056, 2.2951888736057775),
-        Destination("Musée du Louvre", 48.86077341478219, 2.337665454169912),
-    ]
 
     api_key =  Variable.get("API_KEY")
 
