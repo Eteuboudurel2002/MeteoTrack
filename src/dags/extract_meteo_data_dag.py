@@ -7,7 +7,7 @@ import psycopg2
 
 default_args = {
     'owner': 'meteotrack8',
-    'start_date': datetime(2025, 2, 25, 00, 00)
+    'start_date': datetime(2025, 2, 28, 00, 00)
 }
 
 class Destination:
