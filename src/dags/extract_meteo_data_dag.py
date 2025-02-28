@@ -174,7 +174,7 @@ def delete_weather_data() :
         
         cursor = connection.cursor()
         today = datetime.today().strftime('%Y-%m-%d')
-        cursor.execute("DELETE FROM weather WHERE weather_date <= %s", (today,))
+        cursor.execute("DELETE FROM weather WHERE weather_date < %s", (today,))
         
         connection.commit()
         
