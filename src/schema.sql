@@ -5,13 +5,16 @@ CREATE TABLE Destination (
 );
 
 CREATE TABLE weather (
-    day INT NOT NULL,
+    weather_date DATE NOT NULL,
+    temp FLOAT NOT NULL,
+    feel_temp FLOAT,
     humidity INT NOT NULL,
     pressure INT NOT NULL,
     main VARCHAR(255) NOT NULL,
     wind_speed FLOAT NOT NULL,
-    rain FLOAT NOT NULL,
+    rain FLOAT,
+    summary TEXT,
     name_destination VARCHAR(255) NOT NULL,
-    PRIMARY KEY (day, name_destination),
+    PRIMARY KEY (weather_date, name_destination),
     FOREIGN KEY (name_destination) REFERENCES Destination(name)
 );

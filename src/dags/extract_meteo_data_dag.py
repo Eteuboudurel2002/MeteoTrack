@@ -63,7 +63,49 @@ def get_destination():
         if connection:
             connection.close()
 
-
+def update_weather(weather_data):
+    
+    HOST = Variable.get("HOST")
+    PORT = Variable.get("PORT")  
+    DATABASE = Variable.get("DATABASE")
+    USER = Variable.get("USER")
+    PASSWORD = Variable.get("PASSWORD")
+    
+    try:
+        connection = psycopg2.connect(
+            host=HOST,
+            port=PORT,
+            database=DATABASE,
+            user=USER,
+            password=PASSWORD
+        )
+        cursor = connection.cursor()
+        
+        # Query to upsert weather data into the database 
+        upsert_query = f"""INSERT INTO weather (weather_date, temp, feel_temp, humidity, pressure,main, wind_speed,rain, summary,  name_destination) 
+                        VALUES 
+                            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (weather_date ,name_destination) DO UPDATE
+                        SET (temp, feel_temp, humidity, pressure,main, wind_speed,rain, summary) = (EXCLUDED.temp, EXCLUDED.feel_temp ,EXCLUDED.humidity, EXCLUDED.pressure, EXCLUDED.main, EXCLUDED.wind_speed,EXCLUDED.rain, EXCLUDED.summary)"""
+        #
+        for dest_weather in weather_data :
+            print(dest_weather)
+            cursor.execute( upsert_query,
+                           (dest_weather["weather_date"], dest_weather["temp"], dest_weather["feel_temp"], dest_weather["humidity"], dest_weather["pressure"], dest_weather["main"], dest_weather["wind_speed"], dest_weather["rain"], dest_weather["summary"], dest_weather["name_destination"]))
+        
+        connection.commit()
+    except Exception as error:
+        print(f"Error: {error}")
+    
+    finally :
+        # Close the cursor and connection to free up resources
+        if cursor :
+            cursor.close()
+        if connection :
+            connection.close()
+        
+    
+    
 def request_api():
 
     destinations = get_destination()
@@ -83,24 +125,31 @@ def request_api():
 
         for entry in data.get("daily", []):
             dt = entry["dt"]
-            day = datetime.utcfromtimestamp(dt).strftime('%Y-%m-%d').split('-')[2]
-            
+            weather_date = datetime.utcfromtimestamp(dt).strftime('%Y-%m-%d')
+            temp = entry.get("temp")["day"]
+            feel_temp = entry.get("feels_like")["day"]
             humidity = entry.get("humidity", None)
             pressure = entry.get("pressure", None)
             wind_speed = entry.get("wind_speed", None)
             main_weather = entry.get("weather", [{}])[0].get("main", None)
             rain = entry.get("rain", None) 
+            summary = entry.get("summary", None)
 
             dest_weather_data.append({
-                "day": day,
+                "weather_date": weather_date,
+                "temp": temp,
+                "feel_temp": feel_temp,
                 "humidity": humidity,
                 "pressure": pressure,
                 "main": main_weather,
                 "wind_speed": wind_speed,
                 "rain": rain,
+                "summary":summary,
                 "name_destination": dest.name
             })
-
+            
+    # update weather data into the database
+    update_weather(dest_weather_data)
     
     print(dest_weather_data)
 
