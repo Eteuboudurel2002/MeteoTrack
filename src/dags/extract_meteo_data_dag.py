@@ -104,7 +104,7 @@ def update_weather(weather_data):
         if connection :
             connection.close()
         
-    
+
     
 def request_api():
 
@@ -153,7 +153,39 @@ def request_api():
     
     print(dest_weather_data)
 
+
+# delete old weather data (for previous days)
+def delete_weather_data() :
+    
+    HOST = Variable.get("HOST")
+    PORT = Variable.get("PORT")  
+    DATABASE = Variable.get("DATABASE")
+    USER = Variable.get("USER")
+    PASSWORD = Variable.get("PASSWORD")
+    
+    try:
+        connection = psycopg2.connect(
+            host=HOST,
+            port=PORT,
+            database=DATABASE,
+            user=USER,
+            password=PASSWORD
+        )
         
+        cursor = connection.cursor()
+        today = datetime.today().strftime('%Y-%m-%d')
+        cursor.execute("DELETE FROM weather WHERE weather_date <= %s", (today,))
+        
+        connection.commit()
+        
+    except Exception as error:
+        print(f"Error : {error}")
+    
+    finally :
+        if cursor :
+            cursor.close()
+        if connection :
+            connection.close() 
 #request_api()
 
 with DAG('meteotrack',
@@ -165,3 +197,10 @@ with DAG('meteotrack',
         task_id='request_api',
         python_callable=request_api
     )
+    
+    delete_task = PythonOperator(
+        task_id="delete_old_weather_data",
+        python_callable=delete_weather_data
+    )
+    
+    streaming_task >> delete_task
