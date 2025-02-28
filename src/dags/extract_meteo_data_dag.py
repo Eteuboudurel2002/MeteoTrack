@@ -116,7 +116,7 @@ def request_api():
 
     for dest in destinations:
 
-        URL = f'https://api.openweathermap.org/data/3.0/onecall?lat={dest.lat}4&lon={dest.long}&exclude=current,minutely,hourly&appid={api_key}'
+        URL = f'https://api.openweathermap.org/data/3.0/onecall?lat={dest.lat}4&lon={dest.long}&exclude=current,minutely,hourly&appid={api_key}&units=metric'
 
         r = requests.get(URL)
 
